@@ -17,4 +17,4 @@ export interface User {
     displayName: string | null;
 }
 
-export type Screen = 'home' | 'leaderboard' | 'history';
+export type Screen = 'home' | 'leaderboard' | 'history' | 'rewards';
