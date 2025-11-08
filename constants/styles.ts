@@ -73,28 +73,6 @@ export const styles = StyleSheet.create({
             },
         }),
     },
-    googleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-        borderWidth: 2,
-        borderColor: '#e5e7eb',
-        borderRadius: 15,
-        padding: 16,
-        marginBottom: 30,
-    },
-    googleIcon: {
-        fontSize: 24,
-        marginRight: 10,
-        fontWeight: 'bold',
-        color: '#4285F4',
-    },
-    googleButtonText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#374151',
-    },
     input: {
         backgroundColor: '#f9fafb',
         borderWidth: 1,
@@ -812,4 +790,76 @@ export const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#dc2626',
     },
+
+
+
+
+    rewardsContent: {
+        padding: 20,
+        paddingBottom: 40,
+    },
+    balanceCard: {
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    rewardCard: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 15,
+        borderWidth: 2,
+        borderColor: '#e5e7eb',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    rewardEmoji: {
+        fontSize: 48,
+        marginRight: 15,
+    },
+    rewardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1f2937',
+        marginBottom: 4,
+    },
+    rewardDescription: {
+        fontSize: 14,
+        color: '#6b7280',
+    },
+    rewardCost: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#16a34a',
+        backgroundColor: '#dcfce7',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 10,
+    },
+    redeemButton: {
+        backgroundColor: '#22c55e',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 12,
+    },
+    redeemButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+
 });
+
+
+

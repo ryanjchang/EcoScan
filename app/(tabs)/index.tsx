@@ -17,6 +17,7 @@ import LeaderboardScreen from '../../components/LeaderboardScreen';
 import LoginScreen from '../../components/LoginScreen';
 import MenuModal from '../../components/MenuModal';
 import RewardModal from '../../components/RewardModal';
+import RewardsScreen from '../../components/RewardsScreen';
 import { styles } from '../../constants/styles';
 import { useAuth } from '../../hooks/useAuth';
 import { EcoAction, Screen } from '../../types';
@@ -199,7 +200,7 @@ export default function HomeScreen() {
       type: verification.actionType,
       name: getActionName(verification.actionType),
       points: getPointsForAction(verification.actionType),
-      co2: Number(getCO2Savings(verification.actionType, verification.estimatedCO2Saved)), // FIX HERE
+      co2: Number(getCO2Savings(verification.actionType, verification.estimatedCO2Saved)),
       emoji: getActionEmoji(verification.actionType),
       id: Date.now(),
       timestamp: new Date().toISOString(),
@@ -226,6 +227,40 @@ export default function HomeScreen() {
     }
   };
 
+  const handleRewardRedeem = async (rewardId: string, cost: number) => {
+    console.log('🎁 Redeem called! Reward:', rewardId, 'Cost:', cost, 'Current points:', points);
+
+    // Deduct points locally
+    const newPoints = points - cost;
+    setPoints(newPoints);
+
+    console.log('💰 New points balance:', newPoints);
+
+    // Update Firestore
+    if (user) {
+      try {
+        console.log('📤 Updating Firestore...');
+        const result = await updateUserProfile(user.uid, user.displayName || '', user.email || '', newPoints);
+
+        if (result.success) {
+          console.log(`✅ Redeemed reward ${rewardId} for ${cost} points. New balance: ${newPoints}`);
+        } else {
+          console.error('❌ Firestore update failed:', result.error);
+          // Rollback if save fails
+          setPoints(points);
+          Alert.alert('Error', 'Failed to redeem reward. Please try again.');
+        }
+      } catch (error) {
+        console.error('❌ Error updating points after redemption:', error);
+        // Rollback if save fails
+        setPoints(points);
+        Alert.alert('Error', 'Failed to redeem reward. Please try again.');
+      }
+    } else {
+      console.log('⚠️ No user logged in');
+    }
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -249,7 +284,7 @@ export default function HomeScreen() {
           <LinearGradient colors={['#22c55e', '#16a34a']} style={styles.navLogo}>
             <Text style={styles.navLogoText}>🌿</Text>
           </LinearGradient>
-          <Text style={styles.navTitle}>EcoRewards</Text>
+          <Text style={styles.navTitle}>Mata</Text>
         </View>
         <View style={styles.navRight}>
           <View style={styles.pointsBadge}>
@@ -287,6 +322,14 @@ export default function HomeScreen() {
             History
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, currentScreen === 'rewards' && styles.tabActive]}
+          onPress={() => setCurrentScreen('rewards')}
+        >
+          <Text style={[styles.tabText, currentScreen === 'rewards' && styles.tabTextActive]}>
+            🎁 Shop
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Main Content */}
@@ -304,6 +347,9 @@ export default function HomeScreen() {
           <LeaderboardScreen user={user} points={points} />
         )}
         {currentScreen === 'history' && <HistoryScreen actions={actions} />}
+        {currentScreen === 'rewards' && (
+          <RewardsScreen points={points} onRedeem={handleRewardRedeem} />
+        )}
       </ScrollView>
 
       {/* Modals */}

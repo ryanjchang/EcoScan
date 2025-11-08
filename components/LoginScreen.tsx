@@ -129,20 +129,6 @@ export default function LoginScreen({ signIn, signUp }: LoginScreenProps) {
                             </Text>
                         </TouchableOpacity>
 
-                        <View style={[styles.featuresContainer, { marginTop: 30 }]}>
-                            <View style={styles.featureCard}>
-                                <Text style={styles.featureEmoji}>📸</Text>
-                                <Text style={styles.featureText}>Capture</Text>
-                            </View>
-                            <View style={styles.featureCard}>
-                                <Text style={styles.featureEmoji}>🤖</Text>
-                                <Text style={styles.featureText}>AI Verify</Text>
-                            </View>
-                            <View style={styles.featureCard}>
-                                <Text style={styles.featureEmoji}>🏆</Text>
-                                <Text style={styles.featureText}>Earn</Text>
-                            </View>
-                        </View>
                     </View>
                 </ScrollView>
             </LinearGradient>
