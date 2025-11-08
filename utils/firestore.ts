@@ -148,14 +148,27 @@ export const getLeaderboard = async (limitCount: number = 10) => {
     }
 };
 
-export const updateUserProfile = async (userId: string, displayName: string, email: string) => {
+export const updateUserProfile = async (
+    userId: string,
+    displayName: string,
+    email: string,
+    points?: number  // Optional points parameter
+) => {
     try {
         const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, {
+
+        const updateData: any = {
             displayName,
             email,
             lastUpdated: new Date().toISOString(),
-        });
+        };
+
+        // Only update points if provided
+        if (points !== undefined) {
+            updateData.points = points;
+        }
+
+        await updateDoc(userRef, updateData);
 
         console.log('✅ User profile updated');
         return { success: true };

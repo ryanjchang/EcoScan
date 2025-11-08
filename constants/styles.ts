@@ -82,7 +82,7 @@ export const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 12,
         fontSize: 16,
-        color: '#000000'
+        color: '#000000',
     },
     authButton: {
         backgroundColor: '#22c55e',
@@ -660,7 +660,7 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 30,
     },
-    rewardCard: {
+    rewardPopupCard: {
         backgroundColor: '#fff',
         borderRadius: 30,
         padding: 40,
@@ -679,15 +679,81 @@ export const styles = StyleSheet.create({
             },
         }),
     },
-    rewardEmoji: {
+    rewardPopupEmoji: {
         fontSize: 80,
         marginBottom: 20,
     },
-    rewardTitle: {
+    rewardPopupTitle: {
         fontSize: 36,
         fontWeight: 'bold',
         color: '#16a34a',
         marginBottom: 10,
+    },
+    rewardPopupSubtitle: {
+        fontSize: 18,
+        color: '#6b7280',
+        marginBottom: 30,
+        textAlign: 'center',
+    },
+    rewardPopupPoints: {
+        borderRadius: 20,
+        padding: 30,
+        alignItems: 'center',
+        width: '100%',
+    },
+    rewardPopupPointsValue: {
+        fontSize: 50,
+        fontWeight: 'bold',
+        color: '#16a34a',
+    },
+    rewardPopupPointsLabel: {
+        fontSize: 16,
+        color: '#6b7280',
+        marginBottom: 15,
+        fontWeight: '500',
+    },
+    rewardPopupCO2: {
+        backgroundColor: '#fff',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    rewardPopupCO2Text: {
+        fontSize: 14,
+        color: '#6b7280',
+        fontWeight: '500',
+    },
+
+    // Rewards Shop Card Styles (different from popup!)
+    rewardCard: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 15,
+        borderWidth: 2,
+        borderColor: '#e5e7eb',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 2,
+            },
+        }),
+    },
+    rewardEmoji: {
+        fontSize: 48,
+        marginRight: 15,
+    },
+    rewardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1f2937',
+        marginBottom: 4,
     },
     rewardSubtitle: {
         fontSize: 18,
@@ -764,12 +830,12 @@ export const styles = StyleSheet.create({
         height: 50,
         marginBottom: 10,
     },
-    menuSupport:{
+    menuSupport: {
         fontSize: 18,
         paddingBottom: 10,
         fontWeight: '300',
         color: '#1f2937',
-        textAlign: 'center'
+        textAlign: 'center',
     },
     menuName: {
         fontSize: 18,
@@ -797,5 +863,53 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#dc2626',
+    },
+
+    // Rewards Shop Styles
+    rewardsContent: {
+        padding: 20,
+        paddingBottom: 40,
+    },
+    balanceCard: {
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
+        alignItems: 'center',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 3,
+            },
+        }),
+    },
+    rewardDescription: {
+        fontSize: 14,
+        color: '#6b7280',
+    },
+    rewardCost: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#16a34a',
+        backgroundColor: '#dcfce7',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 10,
+    },
+    redeemButton: {
+        backgroundColor: '#22c55e',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 12,
+    },
+    redeemButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14,
     },
 });

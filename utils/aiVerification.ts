@@ -1,12 +1,15 @@
 export interface VerificationResult {
     isEcoFriendly: boolean;
-    actionType: 'bottle' | 'recycle' | 'bike' | 'compost' | 'other';
+    actionType: 'bottle' | 'recycle' | 'bike' | 'compost' | 'trash' | 'other';
     confidence: number;
     reasoning: string;
+    estimatedCO2Saved: number; // in grams
+    impactDescription: string; // e.g., "Equivalent to 2km not driven by car"
 }
 
 export const verifyEcoAction = async (imageUri: string): Promise<VerificationResult> => {
-//
+
+
     try {
         console.log('🤖 Starting AI verification...');
 
@@ -40,17 +43,30 @@ export const verifyEcoAction = async (imageUri: string): Promise<VerificationRes
                         role: 'system',
                         content: `You are an environmental expert. Analyze images and determine if they show eco-friendly actions.
 
-Valid eco-actions: reusable bottles/cups, recycling, composting, biking, public transport, reusable bags, solar panels, planting trees.
+Valid eco-actions: reusable bottles/cups, recycling, composting, biking, public transport, reusable bags, solar panels, planting trees, general proper disposal of trash in bins.
+
+Estimate the CO2 savings in grams based on what you see:
+- Reusable bottle/cup: 20-100g (vs single-use plastic)
+- Recycling items: 50-200g depending on amount
+- Biking: 100-500g depending on distance (avg car emits 200g CO2/km)
+- Composting: 50-300g depending on amount
+- Public transport: 150-400g vs driving
+- Reusable bags: 10-50g vs plastic bags
+- Proper trash disposal: 10-50g (prevents littering/pollution)
+- Other eco-actions: estimate reasonably
 
 Respond ONLY with valid JSON in this exact format:
 {
   "isEcoFriendly": true,
   "actionType": "bottle",
   "confidence": 85,
-  "reasoning": "Shows a reusable water bottle being refilled"
+  "reasoning": "Shows a reusable water bottle being refilled",
+  "estimatedCO2Saved": 75,
+  "impactDescription": "Equal to 0.4km not driven by car"
 }
 
-actionType must be one of: "bottle", "recycle", "bike", "compost", "other"`
+actionType must be one of: "bottle", "recycle", "bike", "compost", "trash", "other"
+estimatedCO2Saved should be a realistic number in grams based on the visible action`
                     },
                     {
                         role: 'user',
@@ -113,19 +129,27 @@ export const getPointsForAction = (actionType: string): number => {
         recycle: 15,
         bike: 25,
         compost: 20,
+        trash: 8,
         other: 10,
     };
 
     return pointsMap[actionType] || 10;
 };
 
-// Determine CO2 savings based on action type
-export const getCO2Savings = (actionType: string): number => {
+// Determine CO2 savings based on action type (fallback if AI doesn't provide estimate)
+export const getCO2Savings = (actionType: string, aiEstimate?: number): number => {
+    // Use AI estimate if available
+    if (aiEstimate && aiEstimate > 0) {
+        return aiEstimate;
+    }
+
+    // Fallback to default estimates
     const co2Map: Record<string, number> = {
         bottle: 50,
         recycle: 100,
         bike: 200,
         compost: 150,
+        trash: 30,
         other: 75,
     };
 
@@ -139,6 +163,7 @@ export const getActionEmoji = (actionType: string): string => {
         recycle: '🗑️',
         bike: '🚴',
         compost: '🌱',
+        trash: '🚮',
         other: '🌍',
     };
 
@@ -152,6 +177,7 @@ export const getActionName = (actionType: string): string => {
         recycle: 'Recycling',
         bike: 'Bike Commute',
         compost: 'Composting',
+        trash: 'Proper Disposal',
         other: 'Eco-Friendly Action',
     };
 

@@ -30,15 +30,15 @@ export default function RewardModal({ visible, action }: RewardModalProps) {
     return (
         <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
             <View style={styles.rewardOverlay}>
-                <Animated.View style={[styles.rewardCard, { transform: [{ scale: scaleAnim }] }]}>
-                    <Text style={styles.rewardEmoji}>🎉</Text>
-                    <Text style={styles.rewardTitle}>Awesome!</Text>
-                    <Text style={styles.rewardSubtitle}>Action verified successfully</Text>
-                    <LinearGradient colors={['#dcfce7', '#bbf7d0']} style={styles.rewardPoints}>
-                        <Text style={styles.rewardPointsValue}>+{action.points}</Text>
-                        <Text style={styles.rewardPointsLabel}>points earned</Text>
-                        <View style={styles.rewardCO2}>
-                            <Text style={styles.rewardCO2Text}>💚 Saved {action.co2}g CO₂</Text>
+                <Animated.View style={[styles.rewardPopupCard, { transform: [{ scale: scaleAnim }] }]}>
+                    <Text style={styles.rewardPopupEmoji}>🎉</Text>
+                    <Text style={styles.rewardPopupTitle}>Awesome!</Text>
+                    <Text style={styles.rewardPopupSubtitle}>Action verified successfully</Text>
+                    <LinearGradient colors={['#dcfce7', '#bbf7d0']} style={styles.rewardPopupPoints}>
+                        <Text style={styles.rewardPopupPointsValue}>+{action.points}</Text>
+                        <Text style={styles.rewardPopupPointsLabel}>points earned</Text>
+                        <View style={styles.rewardPopupCO2}>
+                            <Text style={styles.rewardPopupCO2Text}>💚 Saved {action.co2}g CO₂</Text>
                         </View>
                     </LinearGradient>
                 </Animated.View>
