@@ -393,7 +393,7 @@ export const styles = StyleSheet.create({
         gap: 12,
     },
     actionCard: {
-        width: (width - 64) / 2,
+        width: (width - 100) / 2,
         backgroundColor: '#f9fafb',
         borderRadius: 20,
         padding: 15,
@@ -574,7 +574,7 @@ export const styles = StyleSheet.create({
     },
     cameraOverlay: {
         flex: 1,
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
     },
     cameraHeader: {
         padding: 20,
@@ -594,8 +594,6 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     cameraFooter: {
-        padding: 20,
-        paddingBottom: 40,
         alignItems: 'center',
     },
     cameraHint: {
@@ -604,7 +602,7 @@ export const styles = StyleSheet.create({
         color: '#fff',
         backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 24,
-        paddingVertical: 12,
+        paddingVertical: 0,
         borderRadius: 20,
     },
     captureButtonContainer: {
@@ -782,8 +780,16 @@ export const styles = StyleSheet.create({
         marginBottom: 30,
     },
     menuAvatar: {
-        fontSize: 40,
+        width: 50,
+        height: 50,
         marginBottom: 10,
+    },
+    menuSupport:{
+        fontSize: 18,
+        paddingBottom: 10,
+        fontWeight: '300',
+        color: '#1f2937',
+        textAlign: 'center'
     },
     menuName: {
         fontSize: 18,

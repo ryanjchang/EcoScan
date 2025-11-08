@@ -67,7 +67,6 @@ export default function CameraModal({
                                         <Text style={styles.cameraCloseText}>✕</Text>
                                     </TouchableOpacity>
                                 </View>
-
                                 <View style={styles.cameraFooter}>
                                     <Text style={styles.cameraHint}>Capture your eco-action</Text>
                                 </View>

@@ -6,7 +6,7 @@ export interface VerificationResult {
 }
 
 export const verifyEcoAction = async (imageUri: string): Promise<VerificationResult> => {
-
+//
     try {
         console.log('🤖 Starting AI verification...');
 

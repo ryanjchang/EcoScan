@@ -3,7 +3,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from '../constants/styles';
 import { EcoAction } from '../types';
-
+import PointsDisplay  from './PointsDisplay';
 interface DashboardScreenProps {
     user: any;
     points: number;
@@ -34,12 +34,12 @@ export default function DashboardScreen({
                 <View style={styles.statsRow}>
                     <View style={styles.statCard}>
                         <Text style={styles.statIcon}>📈</Text>
-                        <Text style={styles.statValue}>{points}</Text>
+                            <PointsDisplay points={points} style={styles.statValue}/>
                         <Text style={styles.statLabel}>Points</Text>
                     </View>
                     <View style={styles.statCard}>
                         <Text style={styles.statIcon}>🌿</Text>
-                        <Text style={styles.statValue}>{actions.length}</Text>
+                        <PointsDisplay points={actions.length} style={styles.statValue} />
                         <Text style={styles.statLabel}>Actions</Text>
                     </View>
                 </View>
