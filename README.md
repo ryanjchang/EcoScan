@@ -1,50 +1,175 @@
-# Welcome to your Expo app 👋
+# 🌿 Mata - Gamified Sustainability Rewards
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Turn green actions into rewards.** Mata is a mobile app that uses AI to verify and reward users for sustainable activities, making environmental responsibility fun and engaging.
 
-## Get started
+[![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/)
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
+## 🎯 **The Problem**
+
+People want to be more sustainable, but lack motivation and a way to track their environmental impact. Traditional sustainability apps are boring, don't provide immediate feedback, and can't verify if users are actually taking eco-friendly actions.
+
+## 💡 **Our Solution**
+
+Mata gamifies sustainability by:
+- 📸 **AI-Powered Verification** - Take photos of eco-actions, GPT-4 Vision validates them
+- 🏆 **Points & Rewards** - Earn points for verified sustainable activities
+- 🌍 **Impact Tracking** - See your real CO₂ savings in grams
+- 🎮 **Leaderboards** - Compete with friends and the community
+- 🔥 **Persistent Progress** - All data saved to the cloud
+
+---
+
+## ✨ **Features**
+
+### 🤖 **AI-Powered Action Verification**
+- GPT-4 Vision API analyzes photos to verify eco-friendly actions
+- Detects: reusable bottles, recycling, biking, composting, and more
+- Provides confidence scores and reasoning
+- Estimates CO₂ savings for each action
+
+### 📱 **Core Functionality**
+- **Sign Up/Login** - Email/password authentication via Firebase
+- **Camera Integration** - Native camera to capture eco-actions in real-time
+- **Points System** - Earn points based on action type and impact
+- **Dashboard** - View total points, actions taken, and CO₂ saved
+- **Leaderboard** - See how you rank against other users
+- **History** - Track all your verified eco-actions with timestamps
+
+### 🌟 **Gamification**
+- Animated reward popups when actions are verified
+- Different point values for different action types
+- CO₂ impact calculator (converts savings to km not driven)
+- Visual progress tracking
+
+---
+
+## 🛠️ **Tech Stack**
+
+| Technology | Purpose |
+|------------|---------|
+| **React Native (Expo)** | Cross-platform mobile framework |
+| **TypeScript** | Type-safe development |
+| **Firebase Auth** | User authentication |
+| **Firestore** | Cloud database for user data persistence |
+| **OpenAI GPT-4 Vision** | AI image analysis and verification |
+| **Expo Camera** | Native camera access |
+| **Linear Gradient** | Beautiful UI animations |
+| **AsyncStorage** | Local auth persistence |
+
+---
+
+## 📸 **Screenshots**
+
+### Login Screen
+Beautiful gradient interface with email/password authentication
+
+### Dashboard
+- Welcome card with user stats
+- Impact tracker showing CO₂ saved
+- Quick action cards
+- Prominent camera button
+
+### Camera View
+- Full-screen native camera
+- Real-time photo capture
+- Preview with retake option
+- AI verification loading state
+
+### Leaderboard
+- Ranked list of users
+- Emoji avatars
+- Highlighted current user
+- Points display
+
+### History
+- Timeline of all verified actions
+- Captured photos
+- Timestamps and impact data
+- Points and CO₂ badges
+
+---
+
+## 🤖 **How AI Verification Works**
+
+1. **User captures photo** of eco-friendly action
+2. **Image converted to base64** for API transmission
+3. **Sent to GPT-4 Vision API** with specialized prompt
+4. **AI analyzes** and returns JSON:
+   ```json
+   {
+     "isEcoFriendly": true,
+     "actionType": "bottle",
+     "confidence": 85,
+     "reasoning": "Shows a reusable water bottle being refilled",
+     "estimatedCO2Saved": 75,
+     "impactDescription": "Equal to 0.4km not driven by car"
+   }
    ```
+5. **Verification logic**:
+   - ✅ High confidence (60%+) → Auto-approve
+   - ⚠️ Low confidence (<60%) → Ask user confirmation
+   - ❌ Not eco-friendly → Reject with explanation
+6. **Points awarded** and data saved to Firestore
 
-2. Start the app
+**Cost**: ~$0.001 per verification using `gpt-4o-mini` model
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🔥 **Firebase Database Schema**
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Users Collection
+```typescript
+users/{userId}
+  ├── email: string
+  ├── name: string
+  ├── points: number
+  ├── actions: array<EcoAction>
+  └── createdAt: timestamp
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+EcoAction {
+  id: number
+  type: 'bottle' | 'recycle' | 'bike' | 'compost' | 'trash' | 'other'
+  name: string
+  points: number
+  co2: number
+  emoji: string
+  timestamp: string
+  image: string (URI)
+  aiReasoning: string
+  confidence: number
+}
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 🎨 **Design Principles**
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Green-first color palette** - Emerald and teal gradients
+- **Mobile-optimized** - Touch-friendly buttons, proper spacing
+- **Instant feedback** - Animations and loading states
+- **Clear hierarchy** - Important actions prominently displayed
+- **Accessibility** - High contrast, readable fonts
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 🚧 **Future Enhancements**
 
-Join our community of developers creating universal apps.
+- [ ] Social features (share achievements, challenge friends)
+- [ ] Rewards marketplace (redeem points for eco-products)
+- [ ] Daily/weekly challenges
+- [ ] Push notifications for reminders
+- [ ] Team competitions (schools, companies)
+- [ ] Carbon offset partnerships
+- [ ] Upload to Firebase Storage for persistent images
+- [ ] Backend API (move OpenAI key server-side)
+- [ ] Android/iOS native builds via EAS
+- [ ] Advanced analytics dashboard
+- [ ] Integration with fitness trackers for bike commutes
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
