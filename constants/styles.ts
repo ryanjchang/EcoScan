@@ -1,6 +1,4 @@
-
 import { Dimensions, Platform, StyleSheet } from 'react-native';
-
 
 const { width } = Dimensions.get('window');
 
@@ -96,6 +94,27 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         color: '#374151',
+    },
+    input: {
+        backgroundColor: '#f9fafb',
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        fontSize: 16,
+    },
+    authButton: {
+        backgroundColor: '#22c55e',
+        paddingVertical: 16,
+        borderRadius: 12,
+        marginTop: 8,
+        alignItems: 'center',
+    },
+    authButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     featuresContainer: {
         flexDirection: 'row',

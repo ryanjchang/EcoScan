@@ -2,29 +2,47 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   StatusBar,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { styles } from './_styles';
+import { styles } from '../../constants/styles';
+import { useAuth } from '../../hooks/useAuth';
+import { getActionEmoji, getActionName, getCO2Savings, getPointsForAction, verifyEcoAction } from '../../utils/aiVerification';
+import { addEcoAction, getUserData } from '../../utils/firestore';
 
 export default function HomeScreen() {
-  const [user, setUser] = useState(null);
+  // Auth state from Firebase
+  const { user, loading, signIn, signUp, signOut } = useAuth();
+
+  // Login form state
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // App state
   const [points, setPoints] = useState(0);
   const [actions, setActions] = useState([]);
-  const [currentScreen, setCurrentScreen] = useState('login');
+  const [currentScreen, setCurrentScreen] = useState('home');
   const [showReward, setShowReward] = useState(false);
   const [lastAction, setLastAction] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const [verifying, setVerifying] = useState(false);
 
   const cameraRef = useRef(null);
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -39,13 +57,31 @@ export default function HomeScreen() {
   const leaderboard = [
     { name: 'Sarah Green', points: 450, avatar: '🌱' },
     { name: 'Mike Earth', points: 380, avatar: '🌍' },
-    { name: user?.name || 'You', points: points, avatar: '⭐', isUser: true },
+    { name: user?.displayName || 'You', points: points, avatar: '⭐', isUser: true },
     { name: 'Emma Eco', points: 220, avatar: '♻️' },
     { name: 'John Leaf', points: 180, avatar: '🍃' },
   ].sort((a, b) => b.points - a.points);
 
   const totalCO2Saved = actions.reduce((sum, action) => sum + action.co2, 0);
 
+  // Load user data when user logs in
+  useEffect(() => {
+    if (user) {
+      loadUserData();
+    }
+  }, [user]);
+
+  const loadUserData = async () => {
+    if (!user) return;
+
+    const result = await getUserData(user.uid);
+    if (result.success && result.data) {
+      setPoints(result.data.points || 0);
+      setActions(result.data.actions || []);
+    }
+  };
+
+  // Reward animation effect
   useEffect(() => {
     if (showReward) {
       Animated.spring(scaleAnim, {
@@ -65,19 +101,45 @@ export default function HomeScreen() {
     }
   }, [showReward]);
 
-  const handleGoogleSignIn = () => {
-    setUser({ name: 'Demo User', email: 'demo@gmail.com' });
-    setCurrentScreen('home');
+  // Auth handlers
+  const handleAuth = async () => {
+    if (authLoading) return;
+
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (isSignUp && !name) {
+      Alert.alert('Error', 'Please enter your name');
+      return;
+    }
+
+    setAuthLoading(true);
+
+    if (isSignUp) {
+      const result = await signUp(email, password, name);
+      if (!result.success) {
+        Alert.alert('Sign Up Failed', result.error);
+      }
+    } else {
+      const result = await signIn(email, password);
+      if (!result.success) {
+        Alert.alert('Sign In Failed', result.error);
+      }
+    }
+
+    setAuthLoading(false);
   };
 
-  const handleLogout = () => {
-    setUser(null);
+  const handleLogout = async () => {
+    await signOut();
     setPoints(0);
     setActions([]);
-    setCurrentScreen('login');
     setShowMenu(false);
   };
 
+  // Camera handlers
   const handleCameraOpen = async () => {
     if (!permission?.granted) {
       const result = await requestPermission();
@@ -100,66 +162,208 @@ export default function HomeScreen() {
     }
   };
 
-  const verifyAction = () => {
-    const randomAction = ecoActionTypes[Math.floor(Math.random() * ecoActionTypes.length)];
+  const verifyAction = async () => {
+    if (!capturedPhoto) return;
+
+    setVerifying(true);
+
+    try {
+      // Show that AI is processing
+      console.log('🤖 Calling GPT-4 Vision API...');
+
+      // Call GPT-4 Vision API to verify the action
+      const verification = await verifyEcoAction(capturedPhoto);
+
+      console.log('✅ AI Result:', verification);
+
+      // Check if action is eco-friendly
+      if (!verification.isEcoFriendly) {
+        Alert.alert(
+          'Not an Eco-Action ❌',
+          verification.reasoning || 'This doesn\'t appear to be an eco-friendly action. Please try capturing a sustainable activity!',
+          [{ text: 'Try Again', onPress: () => { setVerifying(false); retakePhoto(); } }]
+        );
+        setVerifying(false);
+        return;
+      }
+
+      // If confidence is too low, ask for confirmation
+      if (verification.confidence < 60) {
+        Alert.alert(
+          'Low Confidence ⚠️',
+          `AI is ${verification.confidence}% confident this is eco-friendly.\n\n${verification.reasoning}\n\nDo you want to proceed?`,
+          [
+            { text: 'Try Again', onPress: () => { setVerifying(false); retakePhoto(); }, style: 'cancel' },
+            { text: 'Yes, Proceed', onPress: () => saveVerifiedAction(verification) }
+          ]
+        );
+        setVerifying(false);
+        return;
+      }
+
+      // Action verified! Save it
+      await saveVerifiedAction(verification);
+
+    } catch (error: any) {
+      console.error('❌ Verification error:', error);
+      setVerifying(false);
+
+      Alert.alert(
+        'Verification Failed',
+        `Error: ${error.message}\n\nMake sure your OpenAI API key is set correctly in utils/aiVerification.ts`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Try Again', onPress: verifyAction }
+        ]
+      );
+    }
+  };
+
+  const saveVerifiedAction = async (verification: any) => {
+    const points = getPointsForAction(verification.actionType);
+    const co2 = getCO2Savings(verification.actionType);
+    const emoji = getActionEmoji(verification.actionType);
+    const name = getActionName(verification.actionType);
+
     const newAction = {
-      ...randomAction,
+      type: verification.actionType,
+      name: name,
+      points: points,
+      co2: co2,
+      emoji: emoji,
       id: Date.now(),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       image: capturedPhoto,
+      aiReasoning: verification.reasoning,
+      confidence: verification.confidence,
     };
 
+    // Update local state immediately
     setActions([newAction, ...actions]);
-    setPoints(points + randomAction.points);
+    setPoints(points + newAction.points);
     setLastAction(newAction);
     setShowCamera(false);
     setCapturedPhoto(null);
+    setVerifying(false);
     setShowReward(true);
+
+    // Save to Firestore
+    if (user) {
+      await addEcoAction(user.uid, newAction);
+    }
   };
 
   const retakePhoto = () => {
     setCapturedPhoto(null);
   };
 
-  if (currentScreen === 'login') {
+  // Loading state
+  if (loading) {
     return (
-      <LinearGradient colors={['#4ade80', '#22c55e', '#16a34a']} style={styles.loginContainer}>
-        <StatusBar barStyle="light-content" />
-        <View style={styles.loginContent}>
-          <View style={styles.logoContainer}>
-            <LinearGradient colors={['#86efac', '#22c55e']} style={styles.logoCircle}>
-              <Text style={styles.logoEmoji}>🌿</Text>
-            </LinearGradient>
-            <Text style={styles.appTitle}>EcoRewards</Text>
-            <Text style={styles.appSubtitle}>Turn green actions into rewards</Text>
-          </View>
-
-          <View style={styles.loginBox}>
-            <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignIn}>
-              <Text style={styles.googleIcon}>G</Text>
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-
-            <View style={styles.featuresContainer}>
-              <View style={styles.featureCard}>
-                <Text style={styles.featureEmoji}>📸</Text>
-                <Text style={styles.featureText}>Capture</Text>
-              </View>
-              <View style={styles.featureCard}>
-                <Text style={styles.featureEmoji}>🤖</Text>
-                <Text style={styles.featureText}>AI Verify</Text>
-              </View>
-              <View style={styles.featureCard}>
-                <Text style={styles.featureEmoji}>🏆</Text>
-                <Text style={styles.featureText}>Earn</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </LinearGradient>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#22c55e" />
+        <Text style={{ marginTop: 20, color: '#6b7280' }}>Loading...</Text>
+      </View>
     );
   }
 
+  // Login screen
+  if (!user) {
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <LinearGradient colors={['#4ade80', '#22c55e', '#16a34a']} style={styles.loginContainer}>
+          <StatusBar barStyle="light-content" />
+          <ScrollView contentContainerStyle={styles.loginContent} keyboardShouldPersistTaps="handled">
+            <View style={styles.logoContainer}>
+              <LinearGradient colors={['#86efac', '#22c55e']} style={styles.logoCircle}>
+                <Text style={styles.logoEmoji}>🌿</Text>
+              </LinearGradient>
+              <Text style={styles.appTitle}>EcoRewards</Text>
+              <Text style={styles.appSubtitle}>Turn green actions into rewards</Text>
+            </View>
+
+            <View style={styles.loginBox}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: '#1f2937' }}>
+                {isSignUp ? 'Create Account' : 'Welcome Back'}
+              </Text>
+
+              {isSignUp && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Full Name"
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+              )}
+
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+
+              <TouchableOpacity
+                style={[styles.authButton, authLoading && { opacity: 0.6 }]}
+                onPress={handleAuth}
+                disabled={authLoading}
+                activeOpacity={0.7}
+              >
+                {authLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.authButtonText}>
+                    {isSignUp ? 'Sign Up' : 'Sign In'}
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
+                <Text style={{ textAlign: 'center', marginTop: 20, color: '#6b7280' }}>
+                  {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+                  <Text style={{ color: '#22c55e', fontWeight: 'bold' }}>
+                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+
+              <View style={[styles.featuresContainer, { marginTop: 30 }]}>
+                <View style={styles.featureCard}>
+                  <Text style={styles.featureEmoji}>📸</Text>
+                  <Text style={styles.featureText}>Capture</Text>
+                </View>
+                <View style={styles.featureCard}>
+                  <Text style={styles.featureEmoji}>🤖</Text>
+                  <Text style={styles.featureText}>AI Verify</Text>
+                </View>
+                <View style={styles.featureCard}>
+                  <Text style={styles.featureEmoji}>🏆</Text>
+                  <Text style={styles.featureText}>Earn</Text>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </LinearGradient>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  // Main app screens (after login)
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -215,7 +419,7 @@ export default function HomeScreen() {
         {currentScreen === 'home' && (
           <View style={styles.homeContent}>
             <LinearGradient colors={['#22c55e', '#16a34a', '#14532d']} style={styles.welcomeCard}>
-              <Text style={styles.welcomeTitle}>Welcome, {user?.name?.split(' ')[0]}! 👋</Text>
+              <Text style={styles.welcomeTitle}>Welcome, {user?.displayName?.split(' ')[0]}! 👋</Text>
               <Text style={styles.welcomeSubtitle}>Ready to make the planet greener?</Text>
               <View style={styles.statsRow}>
                 <View style={styles.statCard}>
@@ -303,7 +507,7 @@ export default function HomeScreen() {
                   <View style={styles.historyInfo}>
                     <Text style={styles.historyName}>✅ {action.name}</Text>
                     <Text style={styles.historyDate}>
-                      {action.timestamp.toLocaleDateString()} at {action.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(action.timestamp).toLocaleDateString()} at {new Date(action.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                     <View style={styles.historyBadges}>
                       <View style={styles.historyBadgeGreen}>
@@ -354,11 +558,25 @@ export default function HomeScreen() {
             <View style={styles.previewContainer}>
               <Image source={{ uri: capturedPhoto }} style={styles.previewImage} resizeMode="cover" />
               <View style={styles.previewOverlay}>
-                <TouchableOpacity style={styles.retakeButton} onPress={retakePhoto} activeOpacity={0.8}>
+                <TouchableOpacity
+                  style={styles.retakeButton}
+                  onPress={retakePhoto}
+                  activeOpacity={0.8}
+                  disabled={verifying}
+                >
                   <Text style={styles.retakeButtonText}>Retake</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.verifyButton} onPress={verifyAction} activeOpacity={0.8}>
-                  <Text style={styles.verifyButtonText}>✓ Verify Action</Text>
+                <TouchableOpacity
+                  style={[styles.verifyButton, verifying && { opacity: 0.6 }]}
+                  onPress={verifyAction}
+                  activeOpacity={0.8}
+                  disabled={verifying}
+                >
+                  {verifying ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.verifyButtonText}>✓ Verify with AI</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -404,7 +622,7 @@ export default function HomeScreen() {
 
               <View style={styles.menuProfile}>
                 <Text style={styles.menuAvatar}>👤</Text>
-                <Text style={styles.menuName}>{user?.name}</Text>
+                <Text style={styles.menuName}>{user?.displayName}</Text>
                 <Text style={styles.menuEmail}>{user?.email}</Text>
               </View>
 
