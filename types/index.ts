@@ -11,10 +11,22 @@ export interface EcoAction {
     confidence?: number;
 }
 
+export interface Quest{
+    type: string;
+    name: string;
+    id: number;
+    points: number;
+    co2: number;
+    progress: number;
+    goal: number;
+    completed?: boolean;
+
+}
+
 export interface User {
     uid: string;
     email: string | null;
     displayName: string | null;
 }
 
-export type Screen = 'home' | 'leaderboard' | 'history' | 'rewards';
+export type Screen = 'home' | 'leaderboard' | 'history' | 'rewards' | 'quests';

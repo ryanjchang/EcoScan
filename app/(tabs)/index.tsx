@@ -18,9 +18,10 @@ import LeaderboardScreen from "../../components/LeaderboardScreen";
 import LoginScreen from "../../components/LoginScreen";
 import MenuModal from "../../components/MenuModal";
 import RewardModal from "../../components/RewardModal";
+import QuestScreen from "../../components/QuestScreen";
 import { styles } from "../../constants/styles";
 import { useAuth } from "../../hooks/useAuth";
-import { EcoAction, Screen } from "../../types";
+import { EcoAction, Screen, Quest} from "../../types";
 import {
   getActionEmoji,
   getActionName,
@@ -41,6 +42,7 @@ export default function HomeScreen() {
 
   const [points, setPoints] = useState(0);
   const [actions, setActions] = useState<EcoAction[]>([]);
+  const [quests, setQuests] = useState<Quest[]>([]);
   const [currentScreen, setCurrentScreen] = useState<Screen>("home");
   const [showReward, setShowReward] = useState(false);
   const [lastAction, setLastAction] = useState<EcoAction | null>(null);
@@ -253,6 +255,28 @@ export default function HomeScreen() {
     }
   };
 
+const waterQuest: Quest = {
+    type: "daily",
+    name: "Water",
+    id: 0,
+    points: 20,
+    co2: 10,
+    progress: 0,
+    goal: 1,
+    completed: false,
+}
+
+const bikeQuest: Quest = {
+    type: "weekly",
+    name: "Bike",
+    id: 1,
+    points: 40,
+    co2: 30,
+    progress: 0,
+    goal: 3,
+    completed: false,
+}
+
   const handleRewardRedeem = async (rewardId: string, cost: number) => {
     console.log('🎁 Redeem called! Reward:', rewardId, 'Cost:', cost, 'Current points:', points);
 
@@ -390,6 +414,14 @@ export default function HomeScreen() {
             Shop
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, currentScreen === 'quests' && styles.tabActive]}
+          onPress={() => setCurrentScreen('quests')}
+        >
+          <Text style={[styles.tabText, currentScreen === 'quests' && styles.tabTextActive]}>
+            Quests
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Main Content */}
@@ -407,6 +439,7 @@ export default function HomeScreen() {
           <LeaderboardScreen user={user} points={points} />
         )}
         {currentScreen === "history" && <HistoryScreen actions={actions} />}
+        {currentScreen === "quests" && <QuestScreen quests={quests} />}
       </ScrollView>
 
       {/* Modals */}
