@@ -8,7 +8,7 @@ export interface VerificationResult {
 }
 
 export const verifyEcoAction = async (imageUri: string): Promise<VerificationResult> => {
-
+    const API_KEY = "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";
 
     try {
         console.log('🤖 Starting AI verification...');

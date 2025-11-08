@@ -27,7 +27,9 @@ import {
   getPointsForAction,
   verifyEcoAction,
 } from '../../utils/aiVerification';
+import { checkCooldown, formatCooldownTime } from '../../utils/cooldowns';
 import { addEcoAction, getUserData, updateUserProfile } from '../../utils/firestore';
+
 
 export default function HomeScreen() {
   const { user, loading, signIn, signUp, signOut } = useAuth();
@@ -148,6 +150,21 @@ export default function HomeScreen() {
         setVerifying(false);
         return;
       }
+
+      // ADD COOLDOWN CHECK HERE - AFTER ECO-FRIENDLY CHECK, BEFORE CONFIDENCE CHECK
+      const cooldownCheck = checkCooldown(verification.actionType, actions);
+
+      if (cooldownCheck.onCooldown && cooldownCheck.timeRemaining) {
+        const timeLeft = formatCooldownTime(cooldownCheck.timeRemaining);
+        Alert.alert(
+          'Action on Cooldown ⏳',
+          `You recently logged a ${getActionName(verification.actionType)} action!\n\nPlease wait ${timeLeft} before logging this action again.\n\nThis prevents spam and ensures fair rewards.`,
+          [{ text: 'OK', onPress: () => { setVerifying(false); setShowCamera(false); setCapturedPhoto(null); } }]
+        );
+        setVerifying(false);
+        return;
+      }
+      // END OF COOLDOWN CHECK
 
       if (verification.confidence < 60) {
         Alert.alert(
