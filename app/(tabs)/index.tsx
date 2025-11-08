@@ -327,7 +327,7 @@ export default function HomeScreen() {
           onPress={() => setCurrentScreen('rewards')}
         >
           <Text style={[styles.tabText, currentScreen === 'rewards' && styles.tabTextActive]}>
-            🎁 Shop
+            Shop
           </Text>
         </TouchableOpacity>
       </ScrollView>
