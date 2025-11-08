@@ -1,8 +1,13 @@
 import {
     arrayUnion,
+    collection,
     doc,
     getDoc,
+    getDocs,
     increment,
+    limit,
+    orderBy,
+    query,
     setDoc,
     updateDoc
 } from 'firebase/firestore';
@@ -13,9 +18,12 @@ export interface UserData {
     actions: any[];
     createdAt: string;
     lastUpdated: string;
+    displayName?: string;
+    email?: string;
+    avatar?: string;
 }
 
-export const getUserData = async (userId: string) => {
+export const getUserData = async (userId: string, userProfile?: { displayName?: string; email?: string }) => {
     try {
         const userRef = doc(db, 'users', userId);
         const userSnap = await getDoc(userRef);
@@ -29,6 +37,9 @@ export const getUserData = async (userId: string) => {
                 actions: [],
                 createdAt: new Date().toISOString(),
                 lastUpdated: new Date().toISOString(),
+                displayName: userProfile?.displayName || 'Anonymous',
+                email: userProfile?.email || '',
+                avatar: '⭐',
             };
             await setDoc(userRef, initialData);
             return { success: true, data: initialData };
@@ -36,7 +47,6 @@ export const getUserData = async (userId: string) => {
     } catch (error: any) {
         console.error('Error getting user data:', error);
 
-        // Return empty data for offline mode - app will work with local state
         if (error.code === 'unavailable' || error.message?.includes('offline')) {
             console.log('📱 Working offline - using local state');
             return {
@@ -46,6 +56,9 @@ export const getUserData = async (userId: string) => {
                     actions: [],
                     createdAt: new Date().toISOString(),
                     lastUpdated: new Date().toISOString(),
+                    displayName: userProfile?.displayName || 'Anonymous',
+                    email: userProfile?.email || '',
+                    avatar: '⭐',
                 },
                 offline: true
             };
@@ -59,49 +72,95 @@ export const getUserData = async (userId: string) => {
                 actions: [],
                 createdAt: new Date().toISOString(),
                 lastUpdated: new Date().toISOString(),
+                displayName: userProfile?.displayName || 'Anonymous',
+                email: userProfile?.email || '',
+                avatar: '⭐',
             }
         };
     }
 };
 
-export const addEcoAction = async (userId: string, action: any) => {
+export const addEcoAction = async (userId: string, action: any, userProfile?: { displayName?: string; email?: string }) => {
     try {
         const userRef = doc(db, 'users', userId);
 
-        // Try to update with increment for points
-        await updateDoc(userRef, {
-            actions: arrayUnion(action),
-            points: increment(action.points),
-            lastUpdated: new Date().toISOString(),
-        });
+        // First check if document exists
+        const userSnap = await getDoc(userRef);
 
-        console.log('✅ Action saved to Firestore');
+        if (userSnap.exists()) {
+            // Document exists, update it
+            await updateDoc(userRef, {
+                actions: arrayUnion(action),
+                points: increment(action.points),
+                lastUpdated: new Date().toISOString(),
+            });
+            console.log('✅ Action saved to Firestore');
+        } else {
+            // Document doesn't exist, create it WITH user profile
+            await setDoc(userRef, {
+                points: action.points,
+                actions: [action],
+                displayName: userProfile?.displayName || 'Anonymous',
+                email: userProfile?.email || '',
+                avatar: '⭐',
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
+            });
+            console.log('✅ User document created with first action');
+        }
+
         return { success: true };
     } catch (error: any) {
         console.error('Error adding eco action:', error);
 
-        // If offline or document doesn't exist, try to create it
-        if (error.code === 'not-found' || error.code === 'unavailable') {
-            try {
-                const userSnap = await getDoc(userRef);
-                const currentData = userSnap.exists() ? userSnap.data() : { points: 0, actions: [] };
-
-                await setDoc(userRef, {
-                    points: (currentData.points || 0) + action.points,
-                    actions: [...(currentData.actions || []), action],
-                    lastUpdated: new Date().toISOString(),
-                    createdAt: currentData.createdAt || new Date().toISOString(),
-                });
-
-                console.log('✅ Action saved (created document)');
-                return { success: true };
-            } catch (retryError: any) {
-                console.log('📱 Offline - action saved locally');
-                return { success: true, offline: true };
-            }
+        if (error.code === 'unavailable' || error.message?.includes('offline')) {
+            console.log('📱 Offline - action saved locally');
+            return { success: true, offline: true };
         }
 
-        // Return success even if offline - we're managing state locally
-        return { success: true, offline: true };
+        return { success: false, error: error.message };
+    }
+};
+
+// Get top users for leaderboard
+export const getLeaderboard = async (limitCount: number = 10) => {
+    try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, orderBy('points', 'desc'), limit(limitCount));
+
+        const querySnapshot = await getDocs(q);
+        const leaderboard: any[] = [];
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            leaderboard.push({
+                userId: docSnap.id,
+                name: data.displayName || data.email?.split('@')[0],
+                points: data.points || 0,
+                avatar: data.avatar || '🌱',
+            });
+        });
+
+        return { success: true, data: leaderboard };
+    } catch (error: any) {
+        console.error('Error fetching leaderboard:', error);
+        return { success: false, error: error.message, data: [] };
+    }
+};
+
+export const updateUserProfile = async (userId: string, displayName: string, email: string) => {
+    try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+            displayName,
+            email,
+            lastUpdated: new Date().toISOString(),
+        });
+
+        console.log('✅ User profile updated');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error updating profile:', error);
+        return { success: false, error: error.message };
     }
 };

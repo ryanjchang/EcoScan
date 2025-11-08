@@ -27,7 +27,7 @@ import {
   getPointsForAction,
   verifyEcoAction,
 } from '../../utils/aiVerification';
-import { addEcoAction, getUserData } from '../../utils/firestore';
+import { addEcoAction, getUserData, updateUserProfile } from '../../utils/firestore';
 
 export default function HomeScreen() {
   const { user, loading, signIn, signUp, signOut } = useAuth();
@@ -62,10 +62,41 @@ export default function HomeScreen() {
 
   const loadUserData = async () => {
     if (!user) return;
-    const result = await getUserData(user.uid);
-    if (result.success && result.data) {
-      setPoints(result.data.points || 0);
-      setActions(result.data.actions || []);
+
+    try {
+      console.log('👤 Loading data for user:', user.uid);
+      console.log('👤 User displayName:', user.displayName);
+      console.log('👤 User email:', user.email);
+
+      // Update profile in Firestore if we have displayName
+      if (user.displayName && user.email) {
+        console.log('🔄 Updating user profile...');
+        await updateUserProfile(user.uid, user.displayName, user.email);
+      }
+
+      console.log('📥 Fetching user data from Firestore...');
+      const result = await getUserData(user.uid, {
+        displayName: user.displayName || undefined,
+        email: user.email || undefined,
+      });
+
+      console.log('📊 Result:', result);
+
+      if (result.success && result.data) {
+        setPoints(result.data.points || 0);
+        setActions(result.data.actions || []);
+
+        if (result.offline) {
+          console.log('📱 App working in offline mode');
+        }
+
+        console.log('✅ User data loaded successfully');
+      } else {
+        console.log('❌ Failed to load user data:', result.error);
+      }
+    } catch (error: any) {
+      console.error('⚠️ Error in loadUserData:', error);
+      console.error('Error details:', error.message);
     }
   };
 
@@ -166,7 +197,10 @@ export default function HomeScreen() {
     setShowReward(true);
 
     if (user) {
-      await addEcoAction(user.uid, newAction);
+      await addEcoAction(user.uid, newAction, {
+        displayName: user.displayName || undefined,
+        email: user.email || undefined,
+      });
     }
   };
 
