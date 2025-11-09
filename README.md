@@ -1,4 +1,4 @@
-# 🌿 Mata - Gamified Sustainability Rewards
+# 🌿 Mata - Gamified Sustainability 
 
 **Turn green actions into rewards.** Mata is a mobile app that uses AI to verify and reward users for sustainable activities, making environmental responsibility fun and engaging.
 
