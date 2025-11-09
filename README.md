@@ -59,37 +59,6 @@ Mata gamifies sustainability by:
 | **OpenAI GPT-4 Vision** | AI image analysis and verification |
 ---
 
-##  **Screenshots**
-
-### Login Screen
-Beautiful gradient interface with email/password authentication
-
-### Dashboard
-- Welcome card with user stats
-- Impact tracker showing CO₂ saved
-- Quick action cards
-- Prominent camera button
-
-### Camera View
-- Full-screen native camera
-- Real-time photo capture
-- Preview with retake option
-- AI verification loading state
-
-### Leaderboard
-- Ranked list of users
-- Emoji avatars
-- Highlighted current user
-- Points display
-
-### History
-- Timeline of all verified actions
-- Captured photos
-- Timestamps and impact data
-- Points and CO₂ badges
-
----
-
 ##  **How AI Verification Works**
 
 1. **User captures photo** of eco-friendly action
