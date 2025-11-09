@@ -91,6 +91,16 @@ Beautiful gradient interface with email/password authentication
 - Timestamps and impact data
 - Points and CO₂ badges
 
+### Shop
+- Convert points into rewards
+- Environmental donations
+- Gain monetary partner rewards
+- 
+### Quests
+- daily quests for more points
+- weekly quests
+- encourage long term improvements
+
 ---
 
 ## 🤖 **How AI Verification Works**
@@ -160,7 +170,6 @@ EcoAction {
 
 - [ ] Social features (share achievements, challenge friends)
 - [ ] Rewards marketplace (redeem points for eco-products)
-- [ ] Daily/weekly challenges
 - [ ] Push notifications for reminders
 - [ ] Team competitions (schools, companies)
 - [ ] Carbon offset partnerships
