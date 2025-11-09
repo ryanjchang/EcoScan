@@ -107,6 +107,7 @@ Mata gamifies sustainability by:
 
 ## **Set Up**
 
+Install Expo Go on your mobile device. Ensure your computer and mobile device are on the same network.
 ````bash
 cd EcoScan
 npx expo start
