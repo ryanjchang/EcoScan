@@ -1,4 +1,4 @@
-# 🌿 Mata - Gamified Sustainability 
+# Mata - Gamified Sustainability 
 
 **Turn green actions into rewards.** Mata is a mobile app that uses AI to verify and reward users for sustainable activities, making environmental responsibility fun and engaging.
 
@@ -9,22 +9,22 @@
 
 ---
 
-## 🎯 **The Problem**
+##  **The Problem**
 
 People want to be more sustainable, but lack motivation and a way to track their environmental impact. Traditional sustainability apps are boring, don't provide immediate feedback, and can't verify if users are actually taking eco-friendly actions.
 
-## 💡 **Our Solution**
+##  **Our Solution**
 
 Mata gamifies sustainability by:
-- 📸 **AI-Powered Verification** - Take photos of eco-actions, GPT-4 Vision validates them
-- 🏆 **Points & Rewards** - Earn points for verified sustainable activities
-- 🌍 **Impact Tracking** - See your real CO₂ savings in grams
-- 🎮 **Leaderboards** - Compete with friends and the community
-- 🔥 **Persistent Progress** - All data saved to the cloud
+- **AI-Powered Verification** - Take photos of eco-actions, GPT-4 Vision validates them
+- **Points & Rewards** - Earn points for verified sustainable activities
+-  **Impact Tracking** - See your real CO₂ savings in grams
+-  **Leaderboards** - Compete with friends and the community
+-  **Persistent Progress** - All data saved to the cloud
 
 ---
 
-## ✨ **Features**
+##  **Features**
 
 ### 🤖 **AI-Powered Action Verification**
 - GPT-4 Vision API analyzes photos to verify eco-friendly actions
@@ -40,7 +40,7 @@ Mata gamifies sustainability by:
 - **Leaderboard** - See how you rank against other users
 - **History** - Track all your verified eco-actions with timestamps
 
-### 🌟 **Gamification**
+###  **Gamification**
 - Animated reward popups when actions are verified
 - Different point values for different action types
 - CO₂ impact calculator (converts savings to km not driven)
@@ -48,7 +48,7 @@ Mata gamifies sustainability by:
 
 ---
 
-## 🛠️ **Tech Stack**
+##  **Tech Stack**
 
 | Technology | Purpose |
 |------------|---------|
@@ -59,7 +59,7 @@ Mata gamifies sustainability by:
 | **OpenAI GPT-4 Vision** | AI image analysis and verification |
 ---
 
-## 📸 **Screenshots**
+##  **Screenshots**
 
 ### Login Screen
 Beautiful gradient interface with email/password authentication
@@ -90,7 +90,7 @@ Beautiful gradient interface with email/password authentication
 
 ---
 
-## 🤖 **How AI Verification Works**
+##  **How AI Verification Works**
 
 1. **User captures photo** of eco-friendly action
 2. **Image converted to base64** for API transmission
@@ -107,16 +107,16 @@ Beautiful gradient interface with email/password authentication
    }
    ```
 5. **Verification logic**:
-   - ✅ High confidence (60%+) → Auto-approve
-   - ⚠️ Low confidence (<60%) → Ask user confirmation
-   - ❌ Not eco-friendly → Reject with explanation
+   - High confidence (60%+) → Auto-approve
+   - Low confidence (<60%) → Ask user confirmation
+   -  Not eco-friendly → Reject with explanation
 6. **Points awarded** and data saved to Firestore
 
 **Cost**: ~$0.001 per verification using `gpt-4o-mini` model
 
 ---
 
-## 🎨 **Design Principles**
+## **Design Principles**
 
 - **Green-first color palette** - Emerald and teal gradients
 - **Mobile-optimized** - Touch-friendly buttons, proper spacing
@@ -126,7 +126,7 @@ Beautiful gradient interface with email/password authentication
 
 ---
 
-## 🚧 **Future Enhancements**
+##  **Future Enhancements**
 
 - [ ] Social features (share achievements, challenge friends)
 - [ ] Daily/weekly challenges
